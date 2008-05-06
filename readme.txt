@@ -1,6 +1,6 @@
 $Id$
 
-htmLawed Drupal 5.x module
+htmLawed Drupal 6.x module
 ==========================
 
 GPL v3 license
@@ -46,9 +46,9 @@ Module installation
 
 2. Enable the 'htmLawed filter/purifier' module after browsing to the 'Administer' > 'Site building' > 'Modules' section of your Drupal site.
 
-3. Browse to the 'Administer' > 'Site configuration' > 'Input formats' section. There you can 'configure' an input format to make it use htmLawed by selecting it in the list of filters available for the input format. With htmLawed turned on, you may safely disable Drupal's 'HTML filter'. Depending on the other filters enabled for the input format, you may need to 'rearrange' the filters. Usually, htmLawed would be set to run as the last filter (perhaps second-last, if the 'Line break converter' filter is enabled).
+3. Browse to the 'Administer' > 'Site configuration' > 'Input formats' section. There you can 'configure' an input format to make it use htmLawed by selecting it in the list of filters available for the input format. With htmLawed turned on, you may safely disable Drupal's 'HTML filter' and 'HTML corrector'. Depending on the other filters enabled for the input format, you may need to 'Rearrange' the filters. Usually, htmLawed would be set to run as the last filter (perhaps second-last, if the 'Line break converter' filter is enabled).
 
-4. To configure htmLawed, choose to 'configure' an input format and then choose the 'Configure' link on the ensuing page. For each content-type for which you wish to enable htmLawed -- the form allows you to choose to use (or disable) htmLawed as well as to configure it by editing the 'Config.' and 'Spec.' form fields -- the former is filled with comma-separated, quoted, key-value pairs e.g., '"safe"=>1, "elements"=>"a, em, strong"' (these are interpreted as PHP array elements), and the latter is a string of text that declares the third argument for the htmLawed function... see htmLawed documentation for more. The 'Help' form field can be filled with information about the filter (such as what tags are allowed) to be displayed to the users.
+4. To configure htmLawed, choose to 'configure' an input format and then choose the 'Configure' link on the ensuing page. For each content-type for which you wish to enable htmLawed -- the form allows you to choose to use (or disable) htmLawed as well as to configure it by editing the 'Config.' and 'Spec.' form fields -- the former is filled with comma-separated, quoted, key-value pairs like '"safe"=>1, "elements"=>"a, em, strong"' (these are interpreted as PHP array elements), and the latter is a string of text that declares the third argument for the htmLawed function... see htmLawed documentation for more. The 'Help' form field can be filled with information about the filter (such as what tags are allowed) to be displayed to the users.
 
   * Filtering is further individualized for 'Body', 'Comment' and 'RSS'. 'Body' refers to the main content (such as a blog-post). 'Comment' refers to a user comment on the main content. 'RSS' refers to the RSS (news feed) item generated from the main content. If htmLawed is enabled for 'RSS', effectively, filtering is done after any filtering specified by 'Body'.
 
@@ -58,7 +58,7 @@ Module installation
 
   * Highly customized filtering can be achieved by appropriately setting 'Config.' and 'Spec.' Refer to htmLawed documentation for more.
 
-5. For restricting user access to the administration of htmLawed settings, go to the 'Administer' > 'User management' section of your site. Ideally, only the main administrator of the site should have the access.
+5. For restricting user access to the administration of htmLawed settings, go to the 'Administer' > 'User management' > 'Permissions' section of your site. Ideally, only the main administrator of the site should have the access.
 
 
 Notes
@@ -82,7 +82,7 @@ Notes
 
 9. When a new content-type is created, the htmLawed-settings to be used with it must be set; otherwise, the default settings will be used.
 
-10. The latest version of Drupal 5 is recommended for use with this module.
+10. The latest version of Drupal 6 is recommended for use with this module.
 
 
 Filter workflow
