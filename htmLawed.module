@@ -324,7 +324,8 @@ function htmLawed_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           eval('$config = array('. $setting['config']. ');');
           if(is_array($config)) {
             if($node->body) {
-              $node->body = _htmLawed_process($node->body, $config, $setting['spec']);
+              // Take care of Drupal's teaser mark
+              $node->body = str_replace('&lt;!--break--&gt;', '<!--break-->', _htmLawed_process($node->body, $config, $setting['spec']));
             }
             if($node->teaser) {
               $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec']);
