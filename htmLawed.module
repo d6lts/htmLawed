@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+// Drupal 5 htmLawed module
+// GPL v3 license
+// Copyright Santosh Patnaik, MD, PhD
+// May 2008
+
 /*
  * The module_comment hook is used for 'save' for 'Comment'
  * Calls _htmLawed_process() to filter data before it is stored
@@ -357,12 +362,13 @@ function htmLawed_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 function htmLawed_node_type($op, $info) {
   switch($op) {
     case 'delete':
-      $count = db_fetch_object(db_query('SELECT COUNT(format) AS count FROM {filter_formats}'))->count;
-      for($i=0; ++$i<=$count;) {
-        $setting = variable_get('htmLawed_format_'. $i, NULL);
+      $result = db_query('SELECT format AS format FROM {filter_formats}');
+      while($format = db_fetch_object($result)) {
+        $format = $format->format;
+        $setting = variable_get('htmLawed_format_'. $format, NULL);
         if(is_array($setting[$info->type])) {
           unset($setting[$info->type]);
-          variable_set('htmLawed_format_'. $i, $setting);
+          variable_set('htmLawed_format_'. $format, $setting);
         }
       }
       break;
