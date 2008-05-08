@@ -20,7 +20,7 @@ The module:
 
   * provides OPTION TO FILTER BEFORE STORAGE in the database (in-built Drupal filters don't do this)
 
-  * allows DIFFERENT SETTINGS FOR COMMENTS & RSS items
+  * allows DIFFERENT SETTINGS FOR COMMENTS & RSS items (teasers)
 
 The module does not install or modify (structures of) existing Drupal database tables; all information is stored in the 'variable' table in items named 'htmLawed_format_x' where 'x' refers to numbers identifying various input formats.
 
