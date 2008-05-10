@@ -50,11 +50,13 @@ Module installation
 
 4. To configure htmLawed, choose to 'configure' an input format and then choose the 'Configure' link on the ensuing page to go to the settings form. For each content-type for which you wish to enable htmLawed, the form allows you to choose to use (or disable) htmLawed as well as to configure it by editing the 'Config.' and 'Spec.' form fields -- the former is filled with comma-separated, quoted, key-value pairs e.g., '"safe"=>1, "elements"=>"a, em, strong"' (these are interpreted as PHP array elements), and the latter is a string of text that declares the third argument for the htmLawed function... see htmLawed documentation for more. The 'Help' form field can be filled with information about the filter (such as what tags are allowed) to be displayed to the users.
 
-  * Filtering is further individualized for 'Body', 'Comment' and 'RSS'. 'Body' refers to the main content (such as a blog-post). 'Comment' refers to a user comment on the main content. 'RSS' refers to the RSS (news feed) item and teaser generated from the main content. If htmLawed is enabled for 'RSS', effectively, filtering is done after any filtering specified by 'Body'.
+  * Filtering is further individualized for 'Body', 'Comment' and 'RSS'. 'Body' refers to the main content (such as a blog-post). 'Comment' refers to a user comment on the main content. 'RSS' refers to the RSS (news feed) item and teaser generated from the main content.
+
+  * If htmLawed is enabled for 'RSS', the htmLawed filtering of the RSS item/teaser is done at the end of all other filtering, including any prior htmLawed filtering because of 'Body'.
 
   * For 'Body' and 'Comment', filtering can also be enabled for the 'save' phase, before input is saved in the site database. However, you have to check if this causes conflicts with other filters that rely on the '<' and '>' characters (such as the PHP code-evaluator filter).
 
-  * The default settings allow the a, em, strong, cite, code, ol, ul, li, dl, dt and dd HTML tags, and deny the id and style attributes, and any unsafe markup (such as the scriptable HTML attributes)
+  * The default settings allow the a, em, strong, cite, code, ol, ul, li, dl, dt and dd HTML tags, and deny the id and style attributes, and any unsafe markup (such as the scriptable HTML attributes). For 'RSS', the default settings will allow 'br' and 'p' as well.
 
   * Highly customized filtering can be achieved by appropriately setting 'Config.' and 'Spec.' Refer to htmLawed documentation for more.
 
