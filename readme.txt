@@ -1,6 +1,6 @@
 $Id$
 
-htmLawed Drupal 6.x module
+htmLawed Drupal 7.x module
 ==========================
 
 GPL v3 license

@@ -1,7 +1,7 @@
 <?php
 // $Id$
 
-// Drupal 6 htmLawed module
+// Drupal 7 htmLawed module
 // GPL v3 license
 // Copyright Santosh Patnaik, MD, PhD
 // May 2008
@@ -431,7 +431,7 @@ function htmLawed_node_type($op, $info) {
  * This also helps display the htmLawed section on the administration-by-module page
  */
 function htmLawed_perm() {
-  return array('administer htmLawed (X)HTML filter/purifier');
+  return array('administer htmLawed (X)HTML filter/purifier' => t('Enable or disable the filter, and configure the filter settings.'));
 }
 
 /*

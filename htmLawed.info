@@ -1,5 +1,6 @@
 ; $Id$
 name = "htmLawed (X)HTML filter/purifier"
 description = Restrict HTML markup as well as make content more secure, and standards- and admin-compliant.
-core = 6.x
+core = 7.x
 php = 4.3
+files[] = htmLawed/htmLawed.php
