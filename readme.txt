@@ -58,6 +58,8 @@ Module installation
 
   * The default settings allow the a, em, strong, cite, code, ol, ul, li, dl, dt and dd HTML tags, and deny the id and style attributes, and any unsafe markup (such as the scriptable HTML attributes). For 'RSS', the default settings will allow 'br' and 'p' as well.
 
+  * The default settings are used to pre-fill the htmLawed module form-fields and during the filtering only if the specific settings cannot be found. Emptying a 'Config.' field does not mean that the default settings will be used.
+
   * Highly customized filtering can be achieved by appropriately setting 'Config.' and 'Spec.' Refer to htmLawed documentation for more.
 
 5. For restricting user access to the administration of htmLawed settings, go to the 'Administer' > 'User management' section of your site. Ideally, only the main administrator of the site should have the access.
