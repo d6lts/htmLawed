@@ -17,7 +17,12 @@ function htmLawed_comment(&$comment, $op) {
     // Check setting
     $node_type = db_fetch_object(db_query('SELECT type AS type FROM {node} WHERE nid = %d', $comment['nid']))->type;
     $setting = variable_get('htmLawed_format_'. $comment['format'], array());
-    $setting = $setting[$node_type]['Comment'];
+    if(isset($setting[$node_type]['Comment'])) {
+      $setting = $setting[$node_type]['Comment'];
+    }
+    else {
+      return;
+    }
     if(empty($setting['save'])) {
       return;
     }
@@ -94,7 +99,12 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
       if(!isset($setting[$node_type])) {
         $setting[$node_type][$for] = array('show'=>1, 'config'=>"'safe'=>1, 'elements'=>'a, em, strong, cite, code, ol, ul, li, dl, dt, dd', 'deny_attribute'=>'id, style'",'spec'=>'');
       }
-      $setting = $setting[$node_type][$for];
+      if(isset($setting[$node_type][$for])) {
+        $setting = $setting[$node_type][$for];
+      }
+      else {
+        return $text;
+      }
       if(empty($setting['show'])) {
         return $text;
       }
@@ -134,7 +144,7 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
       
       $first = FALSE;
       foreach($content_types as $k=>$v) {
-        if(!is_array($setting[$k])) {
+        if(!isset($setting[$k]) or !is_array($setting[$k])) {
           foreach(array('Body', 'Comment', 'RSS') as $for) {
             $val[$for] = array('show'=>($for == 'RSS' ? 0 : 1), 'config'=>"'safe'=>1, 'elements'=>'a, em, strong, cite, code, ol, ul, li, dl, dt, dd". ($for == 'RSS' ? ', br, p' : ''). "', 'deny_attribute'=>'id, style'", 'spec'=>'', 'help'=>'Elements allowed: a, em, strong, cite, code, ol, ul, li, dl, dt, dd'. ($for == 'RSS' ? ', br, p' : ''));
             if($for != 'RSS') {
@@ -156,7 +166,7 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
             '#type' => 'fieldset',
             '#title' => t($for). ' <small>[<em>'. $v. '</em>]</small>', // Reduce confusion
             '#collapsible' => TRUE,
-            '#collapsed' => !($setting[$k][$for]['show'] or $setting[$k][$for]['save']), // Reduce confusion
+            '#collapsed' => $for == 'RSS' ? !$setting[$k][$for]['show'] : !($setting[$k][$for]['show'] or $setting[$k][$for]['save']), // Reduce confusion
           );
           $form['htmLawed']['htmLawed_'. $k]['htmLawed_'. $k. '_'. $for]['htmLawed_'. $k. '_'. $for. '_show'] = array(
             '#type' => 'checkbox',
@@ -236,7 +246,12 @@ function htmLawed_filter_tips($delta, $format, $long = FALSE) {
       $node_type = db_fetch_object(db_query('SELECT type AS type FROM {node} WHERE nid = %d', $node_id))->type;
     }
     $setting = variable_get('htmLawed_format_'. $format, array());
-    $setting = $setting[$node_type][$for];
+    if(isset($setting[$node_type][$for])) {
+      $setting = $setting[$node_type][$for];
+    }
+    else {
+      return;
+    }
     if(!empty($setting['show']) or !empty($setting['save'])) {
       return $setting['help'];
     }
@@ -277,6 +292,8 @@ function htmLawed_help($section) {
       t('<strong>To enable and configure</strong> htmLawed per input format, visit the <em>!input_formats</em> section and choose to <em>configure</em> an input format that needs to include htmLawed-filtering. In the subsequently-displayed form, enable the htmLawed filter. Because htmLawed does the task of the Drupal <em>HTML filter</em>, that filter can be disabled. Unlike the Drupal filter, htmLawed can also be used to restrict HTML attributes and URL protocols, balance tags, etc. Depending on the types of filters the input format uses, you may need to re-arrange the filters using the <em>rearrange</em> link on the form -- htmLawed would usually be the last filter to be run (perhaps second-last if the <em>Line break converter</em> filter is enabled).', array('!input_formats' => l(t('Input formats'), 'admin/settings/filters'))) . '<br /><br />' .
 
       t('You then need to configure the content-type-specific htmLawed settings for an input format by choosing the <em>Configure</em> link for that format. On the ensuing form, for each content-type, provide values for the <em>Config.</em>, <em>Spec.</em> and <em>Help</em> fields -- the first is filled with comma-separated, quoted, key-value pairs, e.g., <code>"safe"=>1, "element"=>"a, em, strong")</code> (these are interpreted as PHP array elements) and the second is for a string of text that declares the third argument for the htmLawed function... see htmLawed <strong><a href="!doc">documentation</a></strong> for more. Content of the <em>Help</em> field will be used as a note to inform users or yourself about the filter, such as what tags are allowed. The default settings allow the <em>a, em, strong, cite, code, ol, ul, li, dl, dt</em> and <em>dd</em> HTML tags, deny the <em>id</em> and <em>style</em> attributes, and any unsafe markup (such as the scriptable <em>onclick</em> attribute).', array('!doc' => drupal_get_path('module', 'htmLawed') . '/htmLawed/htmLawed_README.htm')) . '<br /><br />' .
+
+      t('The default settings are used to pre-fill the htmLawed module form-fields and during the filtering only if the specific settings cannot be found. Emptying a <em>Config.</em> field does not mean that the default settings will be used.') . '<br /><br />' .
 
       t('Independent settings need to be applied for the <em>Body</em>, <em>Comment</em> and <em>RSS</em> types: the first refers to the main content; the second to user comments for the main content; and, the third, to the teaser and RSS item generated from the main content.') . '<br /><br />' .
 
@@ -332,16 +349,18 @@ function htmLawed_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
       $filters = array_keys(filter_list_format($node->format));
       if(in_array('htmLawed/0', $filters)) {
         $setting = variable_get('htmLawed_format_'. $node->format, array());
-        $setting = $setting[$node->type]['Body'];
-        if(!empty($setting['save'])) {
-          eval('$config = array('. $setting['config']. ');');
-          if(is_array($config)) {
-            if($node->body) {
-              // Take care of Drupal's teaser mark
-              $node->body = str_replace('&lt;!--break--&gt;', '<!--break-->', _htmLawed_process($node->body, $config, $setting['spec']));
-            }
-            if($node->teaser) {
-              $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec']);
+        if(isset($setting[$node->type]['Body'])) {
+          $setting = $setting[$node->type]['Body'];
+          if(!empty($setting['save'])) {
+            eval('$config = array('. $setting['config']. ');');
+            if(is_array($config)) {
+              if(isset($node->body)) {
+                // Take care of Drupal's teaser mark
+                $node->body = str_replace('&lt;!--break--&gt;', '<!--break-->', _htmLawed_process($node->body, $config, $setting['spec']));
+              }
+              if(isset($node->teaser)) {
+                $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec']);
+              }
             }
           }
         }
@@ -355,11 +374,13 @@ function htmLawed_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         if(!isset($setting[$node->type])) {
           $setting[$node->type]['RSS'] = array('show'=>1, 'config'=>"'safe'=>1, 'elements'=>'a, em, strong, cite, code, ol, ul, li, dl, dt, dd, br, p', 'deny_attribute'=>'id, style'",'spec'=>'');
         }
-        $setting = $setting[$node->type]['RSS'];
-        if(!empty($setting['show'])) {
-          eval('$config = array('. $setting['config']. ');');
-          if(is_array($config) and $node->teaser) {
-            $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec']);
+        if(isset($setting[$node->type]['RSS'])) {
+          $setting = $setting[$node->type]['RSS'];
+          if(!empty($setting['show'])) {
+            eval('$config = array('. $setting['config']. ');');
+            if(is_array($config) and isset($node->teaser)) {
+              $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec']);
+            }
           }
         }
       }
@@ -372,11 +393,13 @@ function htmLawed_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         if(!isset($setting[$node->type])) {
           $setting[$node->type]['RSS'] = array('show'=>1, 'config'=>"'safe'=>1, 'elements'=>'a, em, strong, cite, code, ol, ul, li, dl, dt, dd, br, p', 'deny_attribute'=>'id, style'",'spec'=>'');
         }
-        $setting = $setting[$node->type]['RSS'];
-        if(!empty($setting['show'])) {
-          eval('$config = array('. $setting['config']. ');');
-          if(is_array($config) and $node->teaser) {
-            $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec']);
+        if(isset($setting[$node->type]['RSS'])) {
+          $setting = $setting[$node->type]['RSS'];
+          if(!empty($setting['show'])) {
+            eval('$config = array('. $setting['config']. ');');
+            if(is_array($config) and isset($node->teaser)) {
+              $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec']);
+            }
           }
         }
       }
@@ -395,7 +418,7 @@ function htmLawed_node_type($op, $info) {
       while($format = db_fetch_object($result)) {
         $format = $format->format;
         $setting = variable_get('htmLawed_format_'. $format, NULL);
-        if(is_array($setting[$info->type])) {
+        if(isset($setting[$info->type]) and is_array($setting[$info->type])) {
           unset($setting[$info->type]);
           variable_set('htmLawed_format_'. $format, $setting);
         }
