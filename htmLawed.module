@@ -209,7 +209,7 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
               '#default_value' => $setting[$k][$for]['show'],
               '#description' => t('Filter content before showing'),
             );
-            if($for != RSS) {
+            if($for != 'RSS') {
               $form['htmLawed'][$my_k][$my_for][$my_for. '_save'] = array(
                 '#type' => 'checkbox',
                 '#title' => t('Enable for <em>save</em>'),
