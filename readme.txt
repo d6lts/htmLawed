@@ -86,7 +86,7 @@ Notes
 
 3. Deleting a content-type will delete the associated htmLawed settings.
 
-4. Deleting an input format will NOT automatically delete the associated htmLawed settings. You'll have to run cron to delete the not-needed htmLawed settings: 'Administer' > 'Reports' > 'Status report' > 'run cron manually'.
+4. Deleting an input format will NOT automatically delete the associated htmLawed settings. You'll have to run cron to delete the not-needed htmLawed settings: 'Administer' > 'Logs' > 'Status report' > 'run cron manually'.
 
 5. Disabling htmLawed for an input format will not delete the associated settings.
 
