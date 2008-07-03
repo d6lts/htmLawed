@@ -31,8 +31,9 @@ function htmLawed_comment(&$comment, $op) {
         // Filter & save this way as  hook_comment is unfortunately called AFTER database insertion
         if(is_array($config)) {
           // Preserve PHP code
-          $htmLawed_hook_parameter = (in_array('php/0', $filters) && strpos($comment['comment'], '<?') !== FALSE) ? 'php' : 0;
+          $htmLawed_hook_parameter = (in_array('php/0', $filters) && strpos($comment['comment'], '<?') !== FALSE) ? 'save_php' : 0;
           db_query("UPDATE {comments} SET comment = '%s' WHERE cid = %d", _htmLawed_process($comment['comment'], $config, $setting['spec'], $htmLawed_hook_parameter), $comment['cid']);
+        }
       }
     }
   }
@@ -424,12 +425,12 @@ function htmLawed_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
           if(is_array($config)) {
             if(isset($node->body)) {
               // Leave any PHP code & Drupal's teaser mark intact
-              $htmLawed_hook_parameter = (in_array('php/0', $filters) && strpos($node->body, '<?') !== FALSE) ? 'php' : 0;
+              $htmLawed_hook_parameter = (in_array('php/0', $filters) && strpos($node->body, '<?') !== FALSE) ? 'save_php' : 0;
               $node->body = _htmLawed_process($node->body, $config, $setting['spec'], $htmLawed_hook_parameter);
               $node->body = str_replace('&lt;!--break--&gt;', '<!--break-->', $node->body);
             }
             if(isset($node->teaser)) {
-              $htmLawed_hook_parameter = (in_array('php/0', $filters) && strpos($node->teaser, '<?') !== FALSE) ? 'php' : 0;
+              $htmLawed_hook_parameter = (in_array('php/0', $filters) && strpos($node->teaser, '<?') !== FALSE) ? 'save_php' : 0;
               $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec'], $htmLawed_hook_parameter);
             }
           }
