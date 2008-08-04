@@ -4,7 +4,7 @@
 // Drupal 6 htmLawed module
 // GPL v3 license
 // Copyright Santosh Patnaik, MD, PhD
-// May 2008
+// August 2008
 
 /*
  * The module_comment hook is used for 'save' for 'Comment'
@@ -23,7 +23,8 @@ function htmLawed_comment(&$comment, $op) {
         return;
       }
       $def_setting = isset($setting['htmLawedDef']['Comment']) ? $setting['htmLawedDef']['Comment'] : array('config'=>"'safe'=>1, 'elements'=>'a, em, strong, cite, code, ol, ul, li, dl, dt, dd', 'deny_attribute'=>'id, style'",'spec'=>'');
-      $node_type = db_fetch_object(db_query('SELECT type AS type FROM {node} WHERE nid = %d', $comment['nid']))->type;
+      $node_object = db_fetch_object(db_query('SELECT type AS type FROM {node} WHERE nid = %d', $comment['nid']));
+      $node_type = $node_object->type;
       $setting = isset($setting[$node_type]['Comment']) ? $setting[$node_type]['Comment'] : array();
       if(!empty($setting['save'])) {
         $setting = !empty($setting['default']) ? $def_setting : $setting;
@@ -48,7 +49,8 @@ function htmLawed_cron() {
   $setting_rows = db_query("SELECT name AS name FROM {variable} WHERE name LIKE 'htmLawed_format_%'");
   while($row = db_fetch_object($setting_rows)) {
     $format = substr($row->name, 16);
-    if(db_fetch_object(db_query('SELECT COUNT(name) AS count FROM {filter_formats} WHERE format = %d', $format))->count < 1) {
+    $object = db_fetch_object(db_query('SELECT COUNT(name) AS count FROM {filter_formats} WHERE format = %d', $format));
+    if($object->count < 1) {
       variable_del('htmLawed_format_'. $format);
       drupal_set_message(t('Variable %htmLawed_format_num storing specific htmLawed settings for a non-existing input format was deleted from the database.', array('%htmLawed_format_num' => "htmLawed_format_$format")));
     }
@@ -87,7 +89,8 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
         }
         elseif(arg(1) == 'edit') {
           $comment_id = arg(2);
-          $node_id = db_fetch_object(db_query('SELECT nid AS nid FROM {comments} WHERE cid = %d', $comment_id))->nid;
+          $node_object = db_fetch_object(db_query('SELECT nid AS nid FROM {comments} WHERE cid = %d', $comment_id));
+          $node_id = $node_object->nid;
         }
       }
       // Body, extra fields because of CCK, etc.
@@ -103,7 +106,8 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
 
       // Content-type
       if($node_id) {
-        $node_type = db_fetch_object(db_query('SELECT type AS type FROM {node} WHERE nid = %d', $node_id))->type;
+        $node_object = db_fetch_object(db_query('SELECT type AS type FROM {node} WHERE nid = %d', $node_id));
+        $node_type = $node_object->type;
       }
 
       // Right settings
@@ -312,7 +316,8 @@ function htmLawed_filter_tips($delta, $format, $long = FALSE) {
       }
       elseif(arg(1) == 'edit') {
         $comment_id = arg(2);
-        $node_id = db_fetch_object(db_query('SELECT nid AS nid FROM {comments} WHERE cid = %d', $comment_id))->nid;
+        $node_object = db_fetch_object(db_query('SELECT nid AS nid FROM {comments} WHERE cid = %d', $comment_id));
+        $node_id = $node_object->nid;
       }
     }
     // Body, extra fields because of CCK, etc.
@@ -333,7 +338,8 @@ function htmLawed_filter_tips($delta, $format, $long = FALSE) {
 
     // Content-type
     if($node_id) {
-      $node_type = db_fetch_object(db_query('SELECT type AS type FROM {node} WHERE nid = %d', $node_id))->type;
+      $node_object = db_fetch_object(db_query('SELECT type AS type FROM {node} WHERE nid = %d', $node_id));
+      $node_type = $node_object->type;
     }
 
     // Right settings
