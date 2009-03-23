@@ -5,12 +5,13 @@ htmLawed Drupal 7.x module
 
     GPL v3 license
     Copyright Santosh Patnaik, MD, PhD
+    Initiated May 2008
 
 
 About the module
 ----------------
 
-    The htmLawed Drupal module enables the use of the htmLawed (X)HTML filter/purifier in Drupal. Unlike Drupal's HTML filter, htmLawed allows fine control on the HTML markup (e.g., restricting URLs by protocols and limiting element attributes), balances tags, etc. Unlike filters like HTMLPurifier, the single-file htmLawed is much faster, more customizable, uses 10-20x less memory, is 10-20x smaller, works with PHP 4, covers all HTML markup, etc.
+    The htmLawed Drupal module enables the use of the htmLawed (X)HTML filter/purifier in Drupal. Unlike Drupal's HTML filter, htmLawed allows fine control on the HTML markup (e.g., restricting URLs by protocols and limiting element-specific attributes), ensures proper nesting and balancing of tags, etc. Unlike filters like HTMLPurifier, the single-file htmLawed is much faster, more customizable, uses 10-20x less memory, is 10-20x smaller, works with PHP 4, covers all HTML markup, etc.
 
     The module:
 
@@ -28,13 +29,13 @@ About the module
 
     If you enable htmLawed, it is important that you understand the security implications of the settings you use and the limitations of htmLawed. It is also recommended that htmLawed be tried using various 'Config' and 'Spec' values using the demo page on the htmLawed website.
 
-    The version of htmLawed used by the module would be indicated on the help section of the module. Keeping the module up-to-date with the latest htmLawed version is as simple as replacing the htmLawed/htmLawed.php and htmLawed/htmLawed_README.htm files in the htmLawed module folder.
+    The version of htmLawed used by the module would be indicated on the web-page for the 'help' section of the module. Keeping the module up-to-date with the latest htmLawed version is as simple as replacing the htmLawed/htmLawed.php and htmLawed/htmLawed_README.htm files in the htmLawed module folder.
 
 
 About htmLawed
 --------------
 
-    htmLawed is a single-file PHP software that makes input text more secure and standard-compliant, and suitable in general from the viewpoint of a web-page administrator, for use in the body of HTML 4, or XHTML 1 or 1.1 documents. It thus is a customizable HTML/XHTML filter, processor, purifier, sanitizer, etc., like the Kses, HTMLPurifier, etc., PHP scripts.
+    htmLawed is a single-file PHP software that makes input text more secure and standard-compliant, and suitable in general from the viewpoint of a web-page administrator, for use in the body of HTML 4, or XHTML 1 or 1.1 documents. It thus is a customizable HTML/XHTML filter, processor, purifier, sanitizer, beautifier, etc., like HTML Tidy or the Kses, HTMLPurifier, etc., PHP scripts.
 
     The lawing-in of input text is needed to ensure that HTML code in the text is standard-compliant, does not introduce security vulnerabilities, and does not break a web-page's design/layout. htmLawed tries to do this by, for example, making HTML well-formed with balanced and properly nested tags, neutralizing code that may be used for cross-site scripting (XSS) attacks, and allowing only specified HTML elements/tags and attributes.
 
@@ -46,17 +47,17 @@ Module installation
 
 1.  Move 'htmLawed' folder inside 'modules/' or 'sites/all/modules' (you may have to create the latter sub-folder).
 
-2.  Enable the 'htmLawed filter/purifier' module after browsing to the 'Administer' > 'Site building' > 'Modules' section of your Drupal site.
+2.  Enable the 'htmLawed (X)HTML filter/purifier' module after browsing to the 'Administer' > 'Site building' > 'Modules' section of your Drupal site.
 
-3.  Browse to the 'Administer' > 'Site configuration' > 'Input formats' section. There you can 'configure' an input format to make it use htmLawed by selecting it in the list of filters available for the input format.
+3.  Browse to the 'Administer' > 'Site configuration' > 'Text formats' section. There you can 'configure' a text format to make it use htmLawed by selecting it in the list of filters available for it.
 
-    With htmLawed turned on, you may safely disable Drupal's 'HTML filter'. Depending on the other filters enabled for the input format, you may need to 'rearrange' the filters. Usually, htmLawed would be set to run as the last filter (perhaps second-last, if the 'Line break converter' filter is enabled).
+    With htmLawed turned on, you may safely disable Drupal's 'HTML filter'. Depending on the other filters enabled for the text format, you may need to 'rearrange' the filters. Usually, htmLawed would be set to run as the last filter.
 
-    If a filter that relies on the '<', '>' or '&' character (such as Drupal's 'PHP evaluator') is being used with the input format, then that filter should run before htmLawed. Further, if that filter generates HTML markup, then htmLawed should be configured to permit such markup.
+    If a filter that relies on the '<', '>' or '&' character (such as Drupal's 'PHP evaluator') is being used with the text format, then that filter should run before htmLawed. Further, if that filter generates HTML markup, then htmLawed should be configured to permit such markup.
 
-4.  The htmLawed filter is a customizable one. Two values, those of 'Config.' and 'Spec.', dictate the customization. Configuring the htmLawed module thus involves specifying the 'Config.' and 'Spec.' values in the settings form. The htmLawed module permits you to use different 'Config.' and 'Spec.' values for different input formats, content-types, etc.
+4.  The htmLawed filter is a customizable one. Two values, those of 'Config.' and 'Spec.', dictate the customization. Configuring the htmLawed module thus involves specifying the 'Config.' and 'Spec.' values in the settings form. The htmLawed module permits you to use different 'Config.' and 'Spec.' values for different text formats, content-types, etc.
 
-    To get to the settings form, choose to 'configure' an input format and then choose the 'Configure' link on the ensuing page. A sub-form ('Default') can be used to set the default values to be used for any content-type. Content-type-specific sub-forms allow you to over-ride the default values as well as to choose to use (or disable) htmLawed.
+    To get to the settings form, choose to 'configure' a text format and then choose the 'Configure' link on the ensuing page. A sub-form ('Default') can be used to set the default values to be used for any content-type. Content-type-specific sub-forms allow you to over-ride the default values as well as to choose to use (or disable) htmLawed.
 
     The 'Config.' form-fields are filled with comma-separated, quoted, key-value pairs; e.g., '"safe"=>1, "elements"=>"a, em, strong"' (these are interpreted as PHP array elements). The 'Spec.' field is optional. The 'Help' field should be filled with information/tips about the filter (such as what tags are allowed) to be displayed to the users. A checkbox is provided in the content-type-specific sub-forms to allow the 'Default' values to be used. If it is unchecked, the content-type-specific values will be used during filtering.
 
@@ -86,15 +87,15 @@ Notes
 
 3. Deleting a content-type will delete the associated htmLawed settings.
 
-4. Deleting an input format will NOT automatically delete the associated htmLawed settings. You'll have to run cron to delete the not-needed htmLawed settings: 'Administer' > 'Reports' > 'Status report' > 'run cron manually'.
+4. Deleting a text format will NOT automatically delete the associated htmLawed settings. You'll have to run cron to delete the not-needed htmLawed settings: 'Administer' > 'Reports' > 'Status report' > 'run cron manually'.
 
-5. Disabling htmLawed for an input format will not delete the associated settings.
+5. Disabling htmLawed for a text format will not delete the associated settings.
 
 6. Uninstalling the htmLawed module through 'Administer' > 'Site building' > 'Modules' > 'Uninstall' will delete all htmLawed settings.
 
 7. Disabling the module will not delete any htmLawed setting.
 
-8. The 'save' functionality is turned off by default for all input formats and content-types.
+8. The 'save' functionality is turned off by default for all text formats and content-types.
 
 9. When a new content-type is created, the htmLawed-settings to be used with it must be set; otherwise, the default settings will be used.
 
@@ -131,6 +132,6 @@ The schematic below is to give an idea of how filtering works in Drupal. Note th
  --------------------------------    
                                      Teaser is similarly filtered
 
-                                     Depending on the input format,
+                                     Depending on the text format,
                                      filters other than htmLawed
                                      may also process the data
