@@ -4,15 +4,16 @@
 // Drupal 7 htmLawed module
 // GPL v3 license
 // Copyright Santosh Patnaik, MD, PhD
-// May 2008
+// Since May 2008
 
 /*
  * The module_comment hook is used for 'save' for 'Comment'
  * Calls _htmLawed_process() to filter data before it is stored
- * The module_filter hook is for 'show', and module_nodeapi hook for 'Body'  for'save', and 'show' for 'Teaser'
  * As this is for 'save', we don't care that there will be no filtering if node's content-type-settings are unavailable
+ * Other filtering in htmLawed_node_rss_item(), htmLawed_node_presave(), htmLawed_filter() and htmLawed_nodeapi() 
  */
 function htmLawed_comment(&$comment, $op) {
+  $config = 0;
   if($op == 'insert' or $op == 'update') {
     $node_format = $comment['format'];
     $filters = array_keys(filter_list_format($node_format));
@@ -42,23 +43,21 @@ function htmLawed_comment(&$comment, $op) {
 /*
  * Delete settings for extinct input formats
  * Also see htmLawed_uninstall() in htmLawed.install, and htmLawed_node_type()
- * Alternative to the failing htmLawed_menu() and htmLawed_form_alter() functions (commented-out below)
  */
 function htmLawed_cron() {
   $setting_rows = db_query("SELECT name AS name FROM {variable} WHERE name LIKE 'htmLawed_format_%'");
   while($row = db_fetch_object($setting_rows)) {
     $format = substr($row->name, 16);
-    if(db_fetch_object(db_query('SELECT COUNT(name) AS count FROM {filter_formats} WHERE format = %d', $format))->count < 1) {
+    if(db_fetch_object(db_query('SELECT COUNT(name) AS count FROM {filter_format} WHERE format = %d', $format))->count < 1) {
       variable_del('htmLawed_format_'. $format);
-      drupal_set_message(t('Variable %htmLawed_format_num storing specific htmLawed settings for a non-existing input format was deleted from the database.', array('%htmLawed_format_num' => "htmLawed_format_$format")));
+      drupal_set_message(t('Variable %htmLawed_format_num storing specific htmLawed settings for a non-existing text format was deleted from the database.', array('%htmLawed_format_num' => "htmLawed_format_$format")));
     }
   }
 }
 
 /*
  * The module_filter hook; for 'show' 
- * htmLawed_comment() and htmLawed_nodeapi() used for 'save' for 'Comment' and 'Body' resp.
- * Latter also for 'show' for 'Teaser'
+ * Other filtering in htmLawed_node_rss_item(), htmLawed_node_presave(), htmLawed_comment() and htmLawed_nodeapi() 
  */
 function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
   switch ($op) {
@@ -116,6 +115,7 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
       }
 
       if(!empty($setting['show'])) {
+        $config = 0;
         $setting = !empty($setting['default']) ? $def_setting : $setting;
         // Filter by calling _htmLawed_process
         eval('$config = array('. $setting['config']. ');');
@@ -130,6 +130,7 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
     
     // Shows sub-forms on the pages for configuring input formats; _htmLawed_store_setting() will save the submitted data
     case 'settings':
+      // Same key as in htmLawed_perm()
       if(!user_access('administer htmLawed (X)HTML filter/purifier')) {
         break;
       }
@@ -209,7 +210,7 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
               '#type' => 'checkbox',
               '#title' => t('Enable'),
               '#default_value' => $setting[$k][$for]['show'],
-              '#description' => t('Filter content before showing'),
+              '#description' => t('Filter content during page-display'),
             );
             if($for != 'RSS') {
               $form['htmLawed'][$my_k][$my_for][$my_for. '_save'] = array(
@@ -221,7 +222,7 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
             }
             $form['htmLawed'][$my_k][$my_for][$my_for. '_default'] = array(
               '#type' => 'checkbox',
-              '#title' => t('Use <a href="!default">default</a> values', array('!default'=>'#htmLawed_default_point')),
+              '#title' => t('Use the <a href="!default">Default</a> values', array('!default'=>'#htmLawed_default_point')),
               '#default_value' => $setting[$k][$for]['default'],
               '#description' => t('For <em>Config.</em>, <em>Help</em> and <em>Spec.</em>'),
             );
@@ -260,12 +261,12 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
             '#rows' => '3',
             '#title' => t('Help'),
             '#default_value' => $setting[$k][$for]['help'],
-            '#description' => t('Tips'),
+            '#description' => t('Tips for users'),
           );
         } // End inner foreach
 
         if(!$subform_count) {
-          $form['htmLawed']['specific_point'] = array(
+          $form['htmLawed']['htmLawed_content_specific_point'] = array(
             '#type' => 'markup',
             '#value' => '<div class="description">'. t('Set values per content-type below. Generic default values are set <a href="!above">above</a>.', array('!above'=>'#htmLawed_default_point')). '<a id="htmLawed_specific_point"></a> <small>'. "$help</small></div>",
           );
@@ -291,11 +292,11 @@ function htmLawed_filter_tips($delta, $format, $long = FALSE) {
   // Content-type unknown
   $basic_out = t('Information indicating specific htmLawed (X)HTML filter/purifier settings in effect will be shown where appropriate.');
   $setting = variable_get('htmLawed_format_'. $format, 0);
-  if(arg(2) == 'filters') {
+  if(arg(2) == 'filter') { // Drupal 7 diff
     if($setting) {
       return $basic_out;
     }
-    return t('For htmLawed to be active, its with this input format needs to be configured and the configuration <em>saved</em>. <a href="!conf" title="!tip">Configure now?</a>', array('!conf'=>url('admin/settings/filters/'. arg(3). '/configure'), '!tip'=>'proceed to configuration form'));
+    return t('For htmLawed to be active with this text format, it needs to be configured and the configuration <em>saved</em>. <a href="!conf" title="!tip">Configure now?</a>', array('!conf'=>url('admin/settings/filter/'. arg(3). '/configure'), '!tip'=>'proceed to configuration form')); // Drupal 7 diff
   }
   if(!$setting) {
     return $basic_out;
@@ -367,34 +368,41 @@ function htmLawed_help($path, $arg) { // Drupal 6 diff.
     case 'admin/content/htmLawed':
       $module_path = drupal_get_path('module', 'htmLawed');
       include_once "$module_path/htmLawed/htmLawed.php"; // For version number
-      return '<div>'. t('The htmLawed (X)HTML filter/purifier module restricts HTML markup in content as well as makes it more secure, and standards- and admin-compliant using the <a href="http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/index.php">htmLawed</a> (version !version) PHP software. Copies of the htmLawed <a href="!doc">documentation</a> and the module <a href="!readme">readme</a> files should be available on your site. A <a href="!handbook">handbook</a> detailing htmLawed module usage may be available on the Drupal website.', array('!doc' => drupal_get_path('module', 'htmLawed') . '/htmLawed/htmLawed_README.htm', '!readme' => drupal_get_path('module', 'htmLawed') . '/readme.txt', '!handbook'=>'http://drupal.org/search/node/htmLawed+type%3Abook', '!version' => hl_version())) . '<br /><br />' .
+      global $base_url;
+      return '<div>'. t('The htmLawed (X)HTML filter/purifier module restricts HTML markup in content as well as makes it more secure, and standards- and admin-compliant using the <a href="http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/index.php">htmLawed</a> (version !version) PHP software. Copies of the htmLawed <a href="!doc">documentation</a> and the module <a href="!readme">readme</a> files should be available on your site. A <a href="!handbook">handbook</a> detailing htmLawed module usage may be available on the Drupal website.', array('!doc' => $base_url. '/'. $module_path . '/htmLawed/htmLawed_README.htm', '!readme' => $base_url. '/'. $module_path . '/readme.txt', '!handbook'=>'http://drupal.org/search/apachesolr_search/htmlawed?filters=type%3abook', '!version' => hl_version())) . '<br /><br />' .
 
-      t('This module can be used to have the htmLawed-filtering configured differently for different input formats and content-types as well as for comments, teasers (like RSS newsfeed items), and other special content. ') . '<br /><br /><hr /><br />' .
+      t('This module can be used to have the htmLawed-filtering configured differently for different text formats and content-types as well as for comments, teasers (like RSS newsfeed items), and other special content. ') . '<br /><br /><hr /><br />' .
 
-      t('To <strong>enable</strong> htmLawed per input format, visit the <em>!input_formats</em> section and choose to <em>configure</em> an input format that needs to include htmLawed-filtering. In the subsequently-displayed form, enable the htmLawed filter.', array('!input_formats' => l(t('Input formats'), 'admin/settings/filters'))) . '<blockquote><div>' . t('Because htmLawed does the task of the Drupal <em>HTML filter</em>, that filter can be disabled. Filters like <em>HTML corrector</em> that are used to balance or properly nest HTML tags can also be disabled. Unlike the Drupal filter, htmLawed can also be used to restrict HTML attributes and URL protocols, balance tags, etc., and that too in a content-type- and case-specific manner. Depending on the types of filters the input format uses, you may need to re-arrange the filters using the <em>rearrange</em> link on the form -- htmLawed would usually be the last filter to be run (can be second-last if the <em>Line break converter</em> filter is enabled and the htmLawed is not configured to beautify HTML code).') . '<br /><br />' .
+      t('To <strong>enable</strong> htmLawed per text format, visit the <em>!text_formats</em> section and choose to <em>configure</em> a text format that needs to include htmLawed-filtering. In the subsequently-displayed form, enable the htmLawed filter.', array('!text_formats' => l(t('Text formats'), 'admin/settings/filter'))) . '<blockquote><div>' . t('Because htmLawed does the task of the Drupal <em>HTML filter</em>, that filter can be disabled. Actions like <em>Correct broken HTML</em> that are used to balance or properly nest HTML tags can also be disabled. Unlike the Drupal filter, htmLawed can also be used to restrict HTML attributes and URL protocols, balance tags, etc., and that too in a content-type- and case-specific manner. Depending on the types of filters the text format uses, you may need to re-arrange the filters using the <em>rearrange</em> link on the form -- htmLawed would usually be the last filter to be run.') . '<br /><br />' .
 
       t('If a filter that relies on the &lt;, &gt; or &amp; character (such as Drupal <em>PHP evaluator</em>) is being used with the input format, then that filter should run before htmLawed. Further, if that filter generates HTML markup, then htmLawed should be configured appropriately to permit such markup.'). '</div></blockquote>' .
 
-      t('The <strong>customization</strong> of htmLawed is dictated by two parameters, <em>Config.</em> and <em>Spec.</em>. Setting specific htmLawed filter settings involves setting values for the two parameters in the htmLawed settings form. To get to the settings form, use the <em>Configure</em> link for an input format for which htmLawed has been enabled. On the settings form, a sub-form, <em>Default</em>, can be used to set the default values to be used for any content-type. Content (node)-type-specific sub-forms allow you to over-ride the default values as well as to choose to use (or disable) htmLawed.') . '<br /><br />' .
+      t('The <strong>customization</strong> of htmLawed is dictated by two parameters, <em>Config.</em> and <em>Spec.</em>. Setting specific htmLawed filter settings involves setting values for the two parameters in the htmLawed settings form. To get to the settings form, use the <em>Configure</em> link for a text format for which htmLawed has been enabled. On the settings form, a sub-form, <em>Default</em>, can be used to set the default values to be used for any content-type. Content (node)-type-specific sub-forms allow you to over-ride the default values as well as to choose to use (or disable) htmLawed.') . '<br /><br />' .
 
-      t('The <em>Config.</em> form-field is filled with comma-separated, quoted, key-value pairs like <code>"safe"=>1, "element"=>"a, em, strong"</code> (these are interpreted as PHP array elements). The <em>Spec.</em> field is an optional string of text... see htmLawed <a href="!doc">documentation</a> for more. Content of the <em>Help</em> field will be used as a note to inform users or yourself about the filter, such as what tags are allowed.', array('!doc' => drupal_get_path('module', 'htmLawed') . '/htmLawed/htmLawed_README.htm')) . '<blockquote><div>' .
+      t('The <em>Config.</em> form-field is filled with comma-separated, quoted, key-value pairs like <code>"safe"=>1, "element"=>"a, em, strong"</code> (these are interpreted as PHP array elements). The <em>Spec.</em> field is an optional string of text... see htmLawed <a href="!doc">documentation</a> for more. Content of the <em>Help</em> field will be used as a note to inform users or yourself about the filter, such as what tags are allowed.', array('!doc' => $base_url. '/'. $module_path . '/htmLawed/htmLawed_README.htm')) . '<blockquote><div>' .
 
-      t('The form-fields are pre-filled the first time htmLawed is being configured for an input format. The values allow the <em>a, em, strong, cite, code, ol, ul, li, dl, dt</em> and <em>dd</em> HTML tags, deny the <em>id</em> and <em>style</em> attributes, and any unsafe markup (such as the scriptable <em>onclick</em> attribute). These same values may be used during the filtering process if the specific or default settings cannot be found. Note that emptying a <em>Config.</em> field does not mean that the default setting will be used.') . '</div></blockquote>' .
+      t('The form-fields are pre-filled the first time htmLawed is being configured for a text format. The values allow the <em>a, em, strong, cite, code, ol, ul, li, dl, dt</em> and <em>dd</em> HTML tags, deny the <em>id</em> and <em>style</em> attributes, and any unsafe markup (such as the scriptable <em>onclick</em> attribute). These same values may be used during the filtering process if the specific or default settings cannot be found. Note that emptying a <em>Config.</em> field does not mean that the default setting will be used.') . '</div></blockquote>' .
 
       t('Individualized settings can be applied for <em>Body</em>, <em>Comment</em> and <em>Teaser</em>: the first refers to the main content; the second to user comments for the main content; and, the third, to the teasers (like RSS newsfeed items) generated from the main content. You may have a need for a fourth case, <em>Other</em>, if you use modules like <em>Views</em> that create extra input fields (like <em>Header</em>) that are not content (node)-type-specific. Content-type-specific settings for <em>Other</em> are obviously not possible') . '<br /><br />' .
 
       t('For <em>Body</em> and <em>Comment</em>, enabling the filter for <em>save</em> can be used to filter input before storage in the database (core Drupal does not filter submissions; filtering is done dynamically when content is displayed on as web-pages), but you have to check if that affects the functioning of filters (other than the Drupal <em>PHP evaluator</em>) that rely on the &lt;, &gt; or &amp; character. For <em>Teaser</em>, the htmLawed filtering is done at the end of all other filtering, including any prior htmLawed filtering because of <em>Body</em>, and the default settings will allow the <em>br</em> and <em>p</em> tags as well.') . '<br /><br /><hr /><br />' .
 
-      t('To control user <strong>permissions</strong> for editing of the htmLawed settings, <a href="!perm">click here</a>.', array('!perm'=>'http://localhost/d5/?q=admin/user/access#module-htmLawed')) . ' Ideally, only the main administrator would have the permission.<br /><br />' .
+      t('To control user <strong>permissions</strong> for editing of the htmLawed settings, !htmlawed_user_perm.', array('!htmlawed_user_perm' => l(t('visit the permissions page'), 'admin/user/permissions'))) . ' Ideally, only the main administrator would have the permission.<br /><br />' .
 
-      t('Content-type-specific htmLawed settings are <strong>deleted</strong> when a type is deleted. However, input-format-specific htmLawed settings are not automatically deleted when a format is deleted; you have to <em>!run_cron_manually</em> to get rid of the no-more-needed settings. Disabling htmLawed for an input format will not delete the associated settings. <em>!Uninstalling</em> the htmLawed module will delete all htmLawed-related settings, but disabling will not result in any deletion.', array('!run_cron_manually' => l(t('run cron manually'), 'admin/reports/status'), '!Uninstalling' => l(t('Uninstalling'), 'admin/build/modules/uninstall'))) . '<br /><br />' . // Drupal 6 diff
+      t('Content-type-specific htmLawed settings are <strong>deleted</strong> when a type is deleted. However, text-format-specific htmLawed settings are not automatically deleted when a format is deleted; you have to <em>!run_cron_manually</em> to get rid of the no-more-needed settings. Disabling htmLawed for a text format will not delete the associated settings. <em>!Uninstalling</em> the htmLawed module will delete all htmLawed-related settings, but disabling will not result in any deletion.', array('!run_cron_manually' => l(t('run cron manually'), 'admin/reports/status'), '!Uninstalling' => l(t('Uninstalling'), 'admin/build/modules/uninstall'))) . '<br /><br />' . // Drupal 6 diff
 
-      t('If you enable htmLawed-filtering, it is important that you understand the security implications of the settings you use and the limitations of htmLawed. Also, check for conflicts with all third-party filter modules you may be using.') . '<br /><br /></div>';
+      t('It is important to understand the security implications of the htmLawed settings in use and the limitations of htmLawed. To keep the htmLawed script included with the module updated, replace the <em>htmLawed.php</em> and <em>htmLawed_README.htm</em> files inside the <em>htmLawed</em> sub-folder of the module folder with newer versions downloaded from the <a href="http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/index.php">htmLawed</a>.') . '<br /><br /></div>';
       break;
-    case 'admin/settings/filters/%/configure': // Drupal6 diff
+    case 'admin/settings/filter/%/configure': // Drupal 7 diff
       $setting = variable_get('htmLawed_format_'. arg(3), 0);
       if(!is_array($setting)) {
-        return '<p>'. t('Though the htmLawed module settings are pre-filled below, you <strong>MUST SAVE</strong> the configuration.') .'</p>';
+        return '<p>'. t('Though the htmLawed filter settings are pre-filled below, you <em>must save</em> the configuration for the filter to be activated.') .'</p>';
+      }
+      break;
+    case 'admin/settings/filter/%': // Drupal 7 diff
+      $setting = variable_get('htmLawed_format_'. arg(3), 0);
+      if(!is_array($setting)) {
+        return '<p>'. t('Though the htmLawed filter is enabled, you <em>must <a href="!conf" title="!tip">configure</a></em> it to activate it for this text format.', array('!conf'=>url('admin/settings/filter/'. arg(3). '/configure'), '!tip'=>'proceed to configuration form')) .'</p>'; // Drupal 7 diff
       }
       break;
   }
@@ -405,57 +413,11 @@ function htmLawed_help($path, $arg) { // Drupal 6 diff.
  * Calls _htmLawed_process() to filter data before it is stored
  * The module_filter hook is for the 'show', and module_comment hook for 'Comment' for'save'
  * No default filtering for 'save' if content-type-settings are unavailable as hook_filter will always be run later
+ * For filtering of others, see htmLawed_filter(), htmLawed_node_rss_item(),  and htmLawed_node_presave()
  */
 function htmLawed_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   $config = 0;
   switch($op) {
-    // 'Body' 'save'; 'Teaser' 'save' too as teaser is generated from body
-    case 'presave': // Drupal 6 diff
-      $filters = array_keys(filter_list_format($node->format));
-      if(in_array('htmLawed/0', $filters)) {
-        $setting = variable_get('htmLawed_format_'. $node->format, 0);
-        if(!is_array($setting)) {
-          return;
-        }
-        $def_setting = isset($setting['htmLawedDef']['Body']) ? $setting['htmLawedDef']['Body'] : array('config'=>"'safe'=>1, 'elements'=>'a, em, strong, cite, code, ol, ul, li, dl, dt, dd', 'deny_attribute'=>'id, style'",'spec'=>'');
-        $setting = isset($setting[$node->type]['Body']) ? $setting[$node->type]['Body'] : array();
-        if(!empty($setting['save'])) {
-          $setting = !empty($setting['default']) ? $def_setting : $setting;
-          eval('$config = array('. $setting['config']. ');');
-          if(is_array($config)) {
-            if(isset($node->body)) {
-              // Leave any PHP code & Drupal's teaser mark intact
-              $htmLawed_hook_parameter = (in_array('php/0', $filters) && strpos($node->body, '<?') !== FALSE) ? 'save_php' : 0;
-              $node->body = _htmLawed_process($node->body, $config, $setting['spec'], $htmLawed_hook_parameter);
-              $node->body = str_replace('&lt;!--break--&gt;', '<!--break-->', $node->body);
-            }
-            if(isset($node->teaser)) {
-              $htmLawed_hook_parameter = (in_array('php/0', $filters) && strpos($node->teaser, '<?') !== FALSE) ? 'save_php' : 0;
-              $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec'], $htmLawed_hook_parameter);
-            }
-          }
-        }
-      }
-      break;
-    // 'Teaser' 'show'; content already filtered, incl. by htmLawed_filter based on 'Body' 'show'
-    case 'rss item':
-      $filters = array_keys(filter_list_format($node->format));
-      if(in_array('htmLawed/0', $filters) and isset($node->teaser)) {
-        $setting = variable_get('htmLawed_format_'. $node->format, 0);
-        if(!is_array($setting)) {
-          return;
-        }
-        $def_setting = isset($setting['htmLawedDef']['RSS']) ? $setting['htmLawedDef']['RSS'] : array('show'=>1, 'config'=>"'safe'=>1, 'elements'=>'a, em, strong, cite, code, ol, ul, li, dl, dt, dd, br, p', 'deny_attribute'=>'id, style'",'spec'=>'');
-        $setting = isset($setting[$node->type]['RSS']) ? $setting[$node->type]['RSS'] : $def_setting;
-        if(!empty($setting['show'])) {
-          $setting = !empty($setting['default']) ? $def_setting : $setting;
-          eval('$config = array('. $setting['config']. ');');
-          if(is_array($config)) {
-            $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec']);
-          }
-        }
-      }
-      break;
     // 'Teaser' 'show' for non-feed teaser; content already filtered, incl. by htmLawed_filter based on 'Body' 'show'
     case 'alter':
       $filters = array_keys(filter_list_format($node->format));
@@ -479,13 +441,72 @@ function htmLawed_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 }
 
 /*
+ * For 'save' for 'Body' (also, effectively, for 'save' for 'Teaser') - filter before saving to database
+ * For filtering of others, see htmLawed_filter(), htmLawed_node_rss_item(),  htmLawed_comment(), and htmLawed_nodeapi()
+*/
+function htmLawed_node_presave($node) { // Drupal 7 new
+  $config = 0;
+  $filters = array_keys(filter_list_format($node->format));
+  if(in_array('htmLawed/0', $filters)) {
+    $setting = variable_get('htmLawed_format_'. $node->format, 0);
+    if(!is_array($setting)) {
+      return;
+    }
+    $def_setting = isset($setting['htmLawedDef']['Body']) ? $setting['htmLawedDef']['Body'] : array('config'=>"'safe'=>1, 'elements'=>'a, em, strong, cite, code, ol, ul, li, dl, dt, dd', 'deny_attribute'=>'id, style'",'spec'=>'');
+    $setting = isset($setting[$node->type]['Body']) ? $setting[$node->type]['Body'] : array();
+    if(!empty($setting['save'])) {
+      $setting = !empty($setting['default']) ? $def_setting : $setting;
+      eval('$config = array('. $setting['config']. ');');
+      if(is_array($config)) {
+        if(isset($node->body)) {
+          // Leave any PHP code & Drupal's teaser mark intact
+          $htmLawed_hook_parameter = (in_array('php/0', $filters) && strpos($node->body, '<?') !== FALSE) ? 'save_php' : 0;
+          $node->body = _htmLawed_process($node->body, $config, $setting['spec'], $htmLawed_hook_parameter);
+          $node->body = str_replace('&lt;!--break--&gt;', '<!--break-->', $node->body);
+        }
+        if(isset($node->teaser)) {
+          $htmLawed_hook_parameter = (in_array('php/0', $filters) && strpos($node->teaser, '<?') !== FALSE) ? 'save_php' : 0;
+          $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec'], $htmLawed_hook_parameter);
+        }
+      }
+    }
+  }
+
+}
+
+/*
+ * Filter RSS item
+ * Note content already filtered, incl. by htmLawed_filter based on 'Body' 'show'
+ * For filtering of others, see htmLawed_filter(), htmLawed_comment(), htmLawed_node_presave(),  and htmLawed_nodeapi()
+*/
+function htmLawed_node_rss_item($node) { // Drupal 7 new
+  $config = 0;
+  $filters = array_keys(filter_list_format($node->format));
+  if(in_array('htmLawed/0', $filters) and isset($node->teaser)) {
+    $setting = variable_get('htmLawed_format_'. $node->format, 0);
+    if(!is_array($setting)) {
+      return;
+    }
+    $def_setting = isset($setting['htmLawedDef']['RSS']) ? $setting['htmLawedDef']['RSS'] : array('show'=>1, 'config'=>"'safe'=>1, 'elements'=>'a, em, strong, cite, code, ol, ul, li, dl, dt, dd, br, p', 'deny_attribute'=>'id, style'",'spec'=>'');
+    $setting = isset($setting[$node->type]['RSS']) ? $setting[$node->type]['RSS'] : $def_setting;
+    if(!empty($setting['show'])) {
+      $setting = !empty($setting['default']) ? $def_setting : $setting;
+      eval('$config = array('. $setting['config']. ');');
+      if(is_array($config)) {
+        $node->teaser = _htmLawed_process($node->teaser, $config, $setting['spec']);
+      }
+    }
+  }
+}
+
+/*
  * Delete content-type htmLawed settings when the content-type is deleted
  * Also see htmLawed_cron() and htmLawed_uninstall() in htmLawed.install
  */
 function htmLawed_node_type($op, $info) {
   switch($op) {
     case 'delete':
-      $result = db_query('SELECT format AS format FROM {filter_formats}');
+      $result = db_query('SELECT format AS format FROM {filter_format}');
       while($format = db_fetch_object($result)) {
         $format = $format->format;
         $setting = variable_get('htmLawed_format_'. $format, NULL);
@@ -501,8 +522,14 @@ function htmLawed_node_type($op, $info) {
 /*
  * This also helps display the htmLawed section on the administration-by-module page
  */
-function htmLawed_perm() {
-  return array('administer htmLawed (X)HTML filter/purifier' => t('Enable or disable the filter, and configure the filter settings.')); // Drupal 7 diff
+function htmLawed_perm() { // Drupal 7 diff
+  return array(
+    // This key should be same whereever user_access() is called
+    'administer htmLawed (X)HTML filter/purifier' => array(
+      'title' => t('Administer htmLawed (X)HTML filter/purifier'),
+      'description' => t('Manage the htmLawed (X)HTML filter/purifier, and select which roles may use them. %warning', array('%warning' => t('Warning: Give to trusted roles only; this permission has security implications.'))),
+    ),
+  );
 }
 
 function htmLawed_theme() { // Drupal 6 new
