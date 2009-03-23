@@ -4,3 +4,10 @@ description = Restrict HTML markup as well as make content more secure, and stan
 core = 7.x
 php = 4.3
 files[] = htmLawed/htmLawed.php
+files[] = htmLawed.module
+; Information added by drupal.org packaging script on 2009-01-29
+version = "7.x-2.x-dev"
+core = "7.x"
+project = "htmLawed"
+datestamp = "1233231095"
+
