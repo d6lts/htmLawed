@@ -10,6 +10,6 @@ function htmLawed_uninstall() {
   while($row = db_fetch_object($setting_rows)) {
     $format = substr($row->name, 16);
     variable_del('htmLawed_format_'. $format);
-    drupal_set_message(t('Variable <em>htmLawed_format_!format</em> storing format-specific htmLawed settings was deleted from the database.', array('!format' => $format)));
+    drupal_set_message(t('Variable <em>htmLawed_format_!format</em> storing input format-specific htmLawed settings was deleted from the database.', array('!format' => $format)));
   }
 }
