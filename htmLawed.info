@@ -1,5 +1,5 @@
 ; $Id$
 name = "htmLawed (X)HTML filter/purifier"
-description = Restrict HTML markup as well as make content more secure, and standards- and admin-compliant.
+description = Restrict HTML markup and make content secure, and standard- and admin. policy-compliant.
 core = 6.x
 php = 4.3
