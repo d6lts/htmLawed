@@ -60,7 +60,7 @@ Module installation
     
     Check the 'Do not cache' item to disable the use of cached filtered content, for content filtered using this input format, which may have other filters besides htmLawed, will not be cached after filtering. Filtering will thus occur every time the content is displayed. Note that besides the Drupal core, other modules may have their own caching logic.
     
-    A sub-form ('Default') can be used to set the default values to be used for any content-type. Content-type-specific sub-forms allow you to over-ride the default values as well as to choose to use (or disable) htmLawed.
+    A sub-form ('Default') can be used to set the default values to be used for any content-type or when a content-type cannot be identified by htmLawed. Content-type-specific sub-forms allow you to over-ride the default values as well as to choose to use (or disable) htmLawed on a content-type-specific basis.
 
     The 'Config.' form-fields are filled with comma-separated, quoted, key-value pairs; e.g., '"safe"=>1, "elements"=>"a, em, strong"' (these are interpreted as PHP array elements). The 'Spec.' field is optional. The 'Help' field should be filled with information/tips about the filter (such as what tags are allowed) to be displayed to the users. A checkbox is provided in the content-type-specific sub-forms to allow the 'Default' values to be used. If it is unchecked, the content-type-specific values will be used during filtering.
 
