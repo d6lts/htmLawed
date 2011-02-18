@@ -357,7 +357,7 @@ function htmLawed_filter_tips($delta, $format, $long = FALSE) {
       $setting = $def_setting;
     }
 
-    if(!empty($setting['show']) or !empty($setting['save'])) {
+    if(!empty($setting['show']) or !isset($setting['show']) or !empty($setting['save'])) {
       $setting = !empty($setting['default']) ? $def_setting : $setting;
       return $setting['help'];
     }
