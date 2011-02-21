@@ -96,11 +96,12 @@ function htmLawed_filter($op, $delta = 0, $format = -1, $text = '') {
       }
       // Body, extra fields because of CCK, etc.
       elseif(arg(0) == 'node') {
-        $for = 'Body';
         if(arg(1) == 'add') {
+          $for = 'Body';
           $node_type = arg(2);
         }
         elseif(is_numeric(arg(1))) {
+          $for = 'Body';
           $node_id = arg(1);
         }
       }
