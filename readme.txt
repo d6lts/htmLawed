@@ -1,4 +1,3 @@
-$Id$
 
 htmLawed Drupal 7.x module
 ==========================

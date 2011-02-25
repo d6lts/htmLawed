@@ -1,4 +1,3 @@
-; $Id$
 name = "htmLawed (X)HTML filter/purifier"
 description = Restrict HTML markup as well as make content more secure, and standards- and admin-compliant.
 core = 7.x
