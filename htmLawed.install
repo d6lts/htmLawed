@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /*
  * Delete all htmLawed settings when module is 'uninstalled' (not 'disabled')
