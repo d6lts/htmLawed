@@ -1,6 +1,4 @@
 name = "htmLawed (X)HTML filter/purifier"
-description = Restrict HTML markup and make content secure, and standard- and admin. policy-compliant.
+description = make HTML markup in text secure and standard-compliant
 core = 7.x
-php = 4.3
-files[] = htmLawed/htmLawed.php
-files[] = htmLawed.module
+php = 5.2
