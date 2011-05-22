@@ -1,4 +1,3 @@
 name = "htmLawed (X)HTML filter/purifier"
-description = make HTML markup in text secure and standard-compliant
+description = "Restrict HTML markup and make content secure, and standard- and admin. policy-compliant"
 core = 7.x
-php = 5.2
