@@ -12,7 +12,7 @@ The htmLawed (X)HTML filter/purifier module restricts HTML markup in content and
 
 *About version 3 of the htmLawed module*
 
-Unlike version 2 (not available for Drupal 7), version 3 does not allow for content-type (node-type)-specific, or teaser- or body-specific htmLawed settings. It also does not have the functionality to 'pre-save' (i.e., filter content before it is stored in the database).
+Unlike version 2 (not available for Drupal 7), version 3 does not allow for content-type (node-type)-specific, or teaser- or body-specific htmLawed settings. It also does not have the functionality to filter content before it is stored in the database. Content-type-specific htmLawed settings can be achieved in Drupal 7 using another module like the 'Better Formats' module, or by using Drupal's core functionality to use different input formats for different content-types, and setting different htmLawed configurations for the different input formats.
 
 
 *Installing the htmLawed module*
@@ -31,7 +31,7 @@ To enable htmLawed for a text format, visit the text formats section of the Drup
 
 The customization of htmLawed is dictated by two parameters, Config. and Spec. Setting specific htmLawed filter settings involves providing values for the two parameters in the htmLawed settings form. The Config. form-field is filled with comma-separated, quoted, key-value pairs like "'safe'=>1, 'element'=>'a, em, strong'" (these are interpreted as PHP array elements and passed to the htmLawed function as Config. parameters). The Spec. field is an optional string of unquoted text... see htmLawed documentation for more on Config. and Spec. Content of the Help field will be used to inform users about the filter, such as what tags are allowed. The form-fields are pre-filled the first time htmLawed is being configured for a text format. The values allow the a, em, strong, cite, code, ol, ul, li, dl, dt and dd HTML elements or tags, and deny the id and style HTML element attributes, and any unsafe markup (such as the the scriptable onclick attribute). If for some reason the htmLawed module cannot identify htmLawed settings for a text format for which htmLawed is enabled, the module will execute the htmLawed filter to enforce these default rules.
 
-Depending on the types of filters the text format uses, you may need to re-arrange the processing order of filters. htmLawed would usually be the last filter to be run. If a filter generates HTML markup and is run before htmLawed, then htmLawed should be configured appropriately to permit such markup. If the Drupal PHP evaluator filter is in use, and it is being run after htmLawed, then ", 'save_php' => 1" should be added to the Config. value of the htmlawed settings.
+Depending on the types of filters the text format uses, you may need to re-arrange the processing order of filters. htmLawed would usually be the last filter to be run. If a filter generates HTML markup and is run before htmLawed, then htmLawed should be configured appropriately to permit such markup. If the Drupal PHP evaluator filter is in use, and it is being run after htmLawed, then ", 'save_php' => 1" should be added to the Config. value of the htmLawed settings.
 
 The htmLawed filter allows use of custom functions during htmLawed filtering. If you want use of such functions, besides setting appropriate values for Config., you will need to have the functions accessible by htmLawed. One option is to have a custom PHP file with the functions included by Drupal by adding a "require_once" call in the Drupal "settings.php" file within the Drupal "sites" folder.
 
@@ -40,6 +40,10 @@ It is important to understand the security implications of the htmLawed settings
 
 *Module development and maintainance*
 
-Santosh Patnaik (version 1 and 2)
-Santosh Patnaik and Federico Jaramillo (version 3)
+Santosh Patnaik
+
+*Special thanks*
+
+Federico Jaramillo (for a temporary dev. version 3 of the module)
+Andy Fowlston (for encouraging full implementation of Drupal's module philosophy)
 
