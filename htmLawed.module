@@ -194,4 +194,7 @@ function htmLawed_help($path, $arg) {
  */
 function _htmLawed_store_setting($form_id = NULL, &$form) {
   variable_set('htmLawed_format_'. $form['values']['format'], array('config'=>$form['values']['config'], 'spec'=>$form['values']['spec'], 'help'=>$form['values']['help']));
+  
+  // Unset unnecessary values
+  unset($form['values']['config'], $form['values']['help'], $form['values']['spec']);
 }
