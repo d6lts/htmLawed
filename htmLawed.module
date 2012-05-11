@@ -1,5 +1,5 @@
 <?php
-// $Id$
+// $Id: htmLawed.module,v 1.1.2.14 2011/02/21 01:32:04 patnaik Exp $
 
 // Drupal 5 htmLawed module
 // GPL v3 license
@@ -560,6 +560,8 @@ function _htmLawed_process($text = '', $config = NULL, $spec = NULL, $hook_param
   if($hook_parameter == 'save_php'){
     $text = preg_replace(array('`\x83\?php(.+?)\?\x84`sme', '`\x83\?php(.*)$`sme'), array("'<?php'. str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), '$1'). '?>'", "'<?php'. str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), '$1')"), $text);
   }
+  // In case Drupal's teaser break is in use
+  $text = str_replace('<!--break -->', '<!--break-->', $text);
   return $text;
 }
 
