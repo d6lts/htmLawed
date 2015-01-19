@@ -7,7 +7,18 @@ Initiated May 2011
 
 *About the htmLawed module*
 
-The htmLawed (X)HTML filter/purifier module restricts HTML markup in content and makes it more secure, and standard- and admin. policy-compliant using the htmLawed PHP software (http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/). A copy of the htmLawed documentation should be available within the "htmLawed" sub-folder of the module. The Drupal website may have a handbook detailing htmLawed module usage (http://drupal.org/node/255886).
+The htmLawed (X)HTML filter/purifier module restricts HTML markup in content and makes it more secure, and standard- and admin. policy-compliant using the htmLawed PHP software library (http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/).
+
+The download for the htmLawed module also includes the htmLawed library along with the library's documentation. To keep the htmLawed library included with the module updated, replace the "htmLawed.php" and "htmLawed_README.htm" files inside the "htmLawed" sub-folder of the module folder with newer versions downloaded from the htmLawed website at http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/.
+
+The Drupal website may have a handbook detailing htmLawed module usage (http://drupal.org/node/255886).
+
+
+*Operability through Libraries (API 2.x) module (feature introduced in version 3.4 of the htmLawed module)
+
+Though, as noted above, the download for the htmLawed module also includes the htmLawed library, one can use the Libraries (API 2.x) contributed Drupal module to load the htmLawed library for use by the htmLawed module. This allows for easier, independent maintenance of the htmLawed module and htmLawed library, and also allows for use of the same htmLawed library by modules other than htmLawed.
+
+When the Libraries module is enabled and it is configured to load the htmLawed library, then the htmLawed module will load the htmLawed library files as dictated by the Libraries module. That is, it will not use the htmLawed library that is included in the download for the htmLawed module, but will instead use files named 'htmLawed.php' and 'htmLawed_README.htm' in a directory named 'htmLawed' in the 'libraries' directory used by the Libraries module.
 
 
 *About version 3 of the htmLawed module*
@@ -35,7 +46,7 @@ Depending on the types of filters the text format uses, you may need to re-arran
 
 The htmLawed filter allows use of custom functions during htmLawed filtering. If you want use of such functions, besides setting appropriate values for Config., you will need to have the functions accessible by htmLawed. One option is to have a custom PHP file with the functions included by Drupal by adding a "require_once" call in the Drupal "settings.php" file within the Drupal "sites" folder.
 
-It is important to understand the security implications of the htmLawed settings in use and the limitations of htmLawed. To keep the htmLawed script included with the module updated, replace the "htmLawed.php" and "htmLawed_README.htm" files inside the "htmLawed" sub-folder of the module folder with newer versions downloaded from the htmLawed website at http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/.
+It is important to understand the security implications of the htmLawed settings in use and the limitations of htmLawed. 
 
 
 *Module development and maintainance*
@@ -46,4 +57,5 @@ Santosh Patnaik
 
 Federico Jaramillo (for a temporary dev. version 3 of the module)
 Andy Fowlston (for encouraging full implementation of Drupal's module philosophy)
+Curtis Blumer, Joshua Ellinger and Tancredi D'Onofrio (for suggesting operability through Libraries module)
 

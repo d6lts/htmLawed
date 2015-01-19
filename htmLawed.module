@@ -27,6 +27,31 @@ function htmLawed_filter_info() {
 }
 
 /**
+ * Implements hook_libraries_info() for Libraries (API 2.x) module.
+ */
+function htmLawed_libraries_info() {
+  $libraries['htmLawed'] = array(
+    'name' => 'htmLawed',
+    'vendor url' => 'http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/',
+    'download url' => 'http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/',
+    'version arguments' => array(
+    // The htmLawed version is supposed to be hard-coded within function hl_version() in htmLawed.php
+      'file' => 'htmLawed.php',
+      'pattern' => "`return '([^']+)'`",
+      'lines' => 1500,
+      'cols' => 30,
+    ),
+    'files' => array(
+      'php' => array(
+        'htmLawed.php',
+      ),
+    ),
+  );
+  return $libraries;
+}
+
+
+/**
  * htmLawed process callback.
  */
 function _htmLawed_process($text, $filter, $format, $langcode, $cache, $cache_id) {
@@ -42,7 +67,13 @@ function _htmLawed_process($text, $filter, $format, $langcode, $cache, $cache_id
   }
 
   $module_path = drupal_get_path('module', 'htmLawed');
-  include_once ("$module_path/htmLawed/htmLawed.php");
+
+  // If Libraries (API 2.x) module is enabled, use htmLawed library through it, else use the htmLawed library provided with the htmLawed module
+  if (function_exists('libraries_load') && ($library = libraries_load('htmLawed')) && !empty($library['loaded']) && function_exists('htmLawed')) {
+  }
+  else {
+    include_once ("$module_path/htmLawed/htmLawed.php");
+  }
   
   // If PHP code blocks are to be preserved, hide the special characters like '<' of '<?php'
   // 'save_php' is NOT an htmLawed parameter per se, but is a parameter for the Drupal htmLawed module
@@ -135,12 +166,22 @@ function htmLawed_help($path, $arg) {
     //case 'admin/help/htmLawed':
     case 'admin/help#htmLawed':
       $module_path = drupal_get_path('module', 'htmLawed');
-      include_once ("$module_path/htmLawed/htmLawed.php"); // For version number
-      return t('The htmLawed (X)HTML filter/purifier module restricts HTML markup in content and makes it more secure, and standard- and admin. policy-compliant using the !htmLawed (version !version) PHP software. Copies of the htmLawed !documentation and the module !readme files should be available on your site. The Drupal website may have a !handbook detailing htmLawed module usage (also check !here).', array('!htmLawed' => l('htmLawed', 'http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/'), '!version' => hl_version(), '!documentation' => l(t('documentation'), $module_path . '/htmLawed/htmLawed_README.htm'), '!readme' => l(t('readme'), $module_path . '/readme.txt'), '!here' => l(t('here'), 'http://drupal.org/search/apachesolr_multisitesearch/htmlawed?filters=ss_meta_type%3Adocumentation'), '!handbook' => l(t('handbook'), 'http://drupal.org/node/255886'))) . '<br /><br />' .
+      // If Libraries 2.x module is enabled, use htmLawed library through it, else use the htmLawed library provided with the htmLawed module; we need the library here to get the htmLawed version number and documentation
+      if (function_exists('libraries_load') && ($library = libraries_load('htmLawed')) && !empty($library['loaded']) && function_exists('hl_version')) {
+        $doc_path = libraries_get_path('htmLawed') . '/';
+        $Libraries_api_used = 1;
+      }
+      else {
+        $doc_path = $module_path . '/htmLawed/';
+        include_once ("$module_path/htmLawed/htmLawed.php");
+      }
+      return t('The htmLawed (X)HTML filter/purifier module restricts HTML markup in content and makes it more secure, and standard- and admin. policy-compliant using the !htmLawed (version !version) PHP software library. Copies of the htmLawed !documentation and the module !readme files should be available on your site. The Drupal website may have a !handbook detailing htmLawed module usage (also check !here).', array('!htmLawed' => l('htmLawed', 'http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed/'), '!version' => hl_version(), '!documentation' => l(t('documentation'), $doc_path . 'htmLawed_README.htm'), '!readme' => l(t('readme'), $module_path . '/readme.txt'), '!here' => l(t('here'), 'http://drupal.org/search/apachesolr_multisitesearch/htmlawed?filters=ss_meta_type%3Adocumentation'), '!handbook' => l(t('handbook'), 'http://drupal.org/node/255886'))) . '<br /><br />' .
+      
+      (!empty($Libraries_api_used) ? t('The htmLawed library active on this Drupal installation has been loaded through the Libraries module.') . '<br /><br />' : '') .
       
       t('To enable htmLawed for a text format, visit the !text_formats section of the Drupal administration site to configure the text format to use htmLawed. Because htmLawed does the task of Drupal\'s HTML filter, that filter can be disabled. Any other default Drupal actions/filters that are used to correct broken HTML, or to balance or properly nest HTML tags can also be disabled since htmLawed performs them as well. Unlike Drupal\'s HTML filter, htmLawed can also be used to restrict HTML attributes, limit URL protocols, etc. Note that htmLawed does not convert URLs into links nor does it convert line breaks into HTML. Content-type (node-type)-specific htmLawed settings can be achieved in Drupal 7 using another module like the "Better Formats" module, or by using Drupal\'s core functionality to use different input formats for different content-types, and setting different htmLawed configurations for the different input formats', array('!text_formats' => l(t('text formats'), 'admin/config/content/formats'))) . '<br /><br />' .
 
-      t('The customization of htmLawed is dictated by two parameters, %Config. and %Spec. Setting specific htmLawed filter settings involves providing values for the two parameters in the htmLawed settings form. The %Config. form-field is filled with comma-separated, quoted, key-value pairs like %example (these are interpreted as PHP array elements and passed to the htmLawed function as %Config. parameters). The %Spec. field is an optional string of unquoted text... see htmLawed !documentation for more on %Config. and %Spec. Content of the %Help field will be used to inform users about the filter, such as what tags are allowed. The form-fields are pre-filled the first time htmLawed is being configured for a text format. The values allow the a, em, strong, cite, code, ol, ul, li, dl, dt and dd HTML elements or tags, and deny the id and style HTML element attributes, and any unsafe markup (such as the the scriptable onclick attribute). If for some reason the htmLawed module cannot identify htmLawed settings for a text format for which htmLawed is enabled, the module will execute the htmLawed filter to enforce these default rules.', array('%Config.' => 'Config.', '%Spec.' => 'Spec.', '%example' => "'safe'=>1, 'element'=>'a, em, strong'", '%Help' => 'Help', '!documentation' => l(t('documentation'), $module_path . '/htmLawed/htmLawed_README.htm'))) . '<br /><br />' .
+      t('The customization of htmLawed is dictated by two parameters, %Config. and %Spec. Setting specific htmLawed filter settings involves providing values for the two parameters in the htmLawed settings form. The %Config. form-field is filled with comma-separated, quoted, key-value pairs like %example (these are interpreted as PHP array elements and passed to the htmLawed function as %Config. parameters). The %Spec. field is an optional string of unquoted text... see htmLawed !documentation for more on %Config. and %Spec. Content of the %Help field will be used to inform users about the filter, such as what tags are allowed. The form-fields are pre-filled the first time htmLawed is being configured for a text format. The values allow the a, em, strong, cite, code, ol, ul, li, dl, dt and dd HTML elements or tags, and deny the id and style HTML element attributes, and any unsafe markup (such as the the scriptable onclick attribute). If for some reason the htmLawed module cannot identify htmLawed settings for a text format for which htmLawed is enabled, the module will execute the htmLawed filter to enforce these default rules.', array('%Config.' => 'Config.', '%Spec.' => 'Spec.', '%example' => "'safe'=>1, 'element'=>'a, em, strong'", '%Help' => 'Help', '!documentation' => l(t('documentation'), $doc_path . 'htmLawed_README.htm'))) . '<br /><br />' .
       
       t(' Depending on the types of filters the text format uses, you may need to re-arrange the processing order of filters. htmLawed would usually be the last filter to be run. If a filter generates HTML markup and is run before htmLawed, then htmLawed should be configured appropriately to permit such markup. If the Drupal PHP evaluator filter is in use, and it is being run after htmLawed, then %save_php should be added to the %Config. value of the htmLawed settings. To allow for use of the Drupal teaser-break indicator, %break_mark, add %comment_setting to the %Config. value of the htmLawed settings. Note that this will now allow all HTML comments to get through the htmLawed filter, but no security or presentation issues are anticipated because of this as %lt_char and %gt_char characters within the comments will be converted to HTML entities.', array('%save_php' => ", 'save_php' => 1", '%Config.' => 'Config.', '%break_mark' => '<!--break-->', '%comment_setting' => ", 'comment' => 2", '%lt_char' => '<', '%gt_char' => '>')) . '<br /><br />' .
 
