@@ -1,0 +1,1 @@
+Dual licensed with LGPL 3+ and GPL 2+
