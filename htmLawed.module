@@ -99,9 +99,6 @@ function _htmLawed_process($text, $filter, $format, $langcode, $cache, $cache_id
  * htmLawed settings callback.
  */
 function _htmLawed_settings($form, &$form_state, $filter, $format, $defaults, $filters) {
-  if (!user_access('administer filters')) {
-    break;
-  }
   $settings = $filter->settings + $defaults;
 
   $elements['htmLawed']['config'] = array(
