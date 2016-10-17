@@ -90,7 +90,7 @@ class Filterhtmlawed extends FilterBase {
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $htmLawed_settings = $this->settings;
     $form['config'] = array(
-      '#prefix' => t('!Help', array('!Help' => \Drupal::l('Help', Url::fromUri('base:admin/help/htmlawed')))),
+      '#prefix' => t('<a href=":url">Help</a>', array(':url' => Url::fromUri('base:admin/help/htmlawed')->toString())),
       '#type' => 'textarea',
       '#rows' => '2',
       '#title' => $this->t('Config.'),
