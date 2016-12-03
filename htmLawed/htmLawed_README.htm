@@ -110,7 +110,7 @@ span.totop a, span.totop a:visited {color: #6699cc;}
 
 <div id="body">
 <br />
-<div class="comment">htmLawed_README.txt, 5 March 2016<br />
+<div class="comment">htmLawed_README.txt, 2 December 2016<br />
 htmLawed 1.1.22, 5 March 2016<br />
 Copyright Santosh Patnaik<br />
 Dual licensed with LGPL 3 and GPL 2+<br />
@@ -788,7 +788,7 @@ A PHP Labware internal utility &#45; <a href="http://www.bioinformatics.org/phpl
 <code class="code">&#160; &#160; $config = array(&#39;safe&#39;=&gt;1);</code>
 <br />
 
-<code class="code">&#160; &#160; $out = htmLawed($in);</code>
+<code class="code">&#160; &#160; $out = htmLawed($in, $config);</code>
 <br />
 <br />
 &#160; Simplest, allowing all valid HTML markup except <span class="term">javascript&#58;</span>&#160;--<br />
@@ -1658,7 +1658,7 @@ A PHP Labware internal utility &#45; <a href="http://www.bioinformatics.org/phpl
 <br />
 <br />
 
-<code class="code">&#160; &#160; &#160; return "&lt;{$element}{$string}". (isset($in_array($element, $empty_elements) ? &#39; /&#39; &#58; &#39;&#39;). &#39;&gt;&#39;. $new_element;</code>
+<code class="code">&#160; &#160; &#160; return "&lt;{$element}{$string}". (array_key_exists($element, $empty_elements) ? &#39; /&#39; &#58; &#39;&#39;). &#39;&gt;&#39;. $new_element;</code>
 <br />
 
 <code class="code">&#160; &#160; }</code>

@@ -11,7 +11,7 @@ The htmLawed module uses the htmLawed PHP library (www.bioinformatics.org/phplab
 
 The module's directory includes the htmLawed PHP library and htmLawed documentation in its 'htmLawed' sub-directory. The content of the sub-directory can be replaced with that for the latest htmLawed version from www.bioinformatics.org/phplabware/internal_utilities/htmLawed.
 
-If the htmLawed library that has been installed through the Libraries Drupal module, then the htmLawed module will use that library.
+If the htmLawed PHP library has been installed through the Libraries Drupal module, then the htmLawed module will use that library, and not the library in the htmLawed module's 'htmLawed' sub-directory.
 
 The Drupal website may have a handbook and other pages detailing htmLawed module usage (http://drupal.org/node/255886 and https://www.drupal.org/search/site/htmlawed?f[0]=ss_meta_type%3Adocumentation).
 
@@ -22,7 +22,8 @@ Place the htmLawed module directory ('htmlawed') in an appropriate location with
 
 Then administer your Drupal website to enable the module.
 
-If the htmLawed library that has been installed through the Libraries Drupal module, then the htmLawed module will use that library.
+Note that if the htmLawed PHP library has been installed through the Libraries Drupal module, then the htmLawed module will use that library, and not the library in the htmLawed module's 'htmLawed' sub-directory.
+
 
 USAGE
 ====================================

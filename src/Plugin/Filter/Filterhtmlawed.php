@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains Drupal\htmlawed\Plugin\Filter\Filterhtmlawed
@@ -32,6 +33,7 @@ use Drupal\filter\Plugin\FilterBase;
  *   }
  * )
  */
+
 class Filterhtmlawed extends FilterBase {
 
   /**
@@ -127,7 +129,7 @@ class Filterhtmlawed extends FilterBase {
   public function tips($long = FALSE) {
     $htmLawed_settings = $this->settings;
     $help = !$long ? Html::escape($htmLawed_settings['help']) : Html::escape($htmLawed_settings['helplong']);
-    $help = !empty($help) ? $help : (!$long ? t('HTML markup is restricted/corrected with the htmLawed filter.') : t('HTML markup is restricted/corrected with the !htmLawed filter for compliance with admin. policy and standards and for security. More details about the restrictions in effect may be available elsewhere, such as in the text of the filter-tips of text formats that use htmLawed and on the forms for configuring text formats.', array('!htmLawed' => \Drupal::l('htmLawed', Url::fromUri('http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed')))) . (!\Drupal::currentUser()->hasPermission('administer filters') ? '' : t(' For information on configuring the htmLawed filter, visit the htmLawed !help section.', array('!help' => \Drupal::l(t('help'), Url::fromUri('base:admin/help/htmlawed'))))));
+    $help = !empty($help) ? $help : (!$long ? t('HTML markup is restricted/corrected with the htmLawed filter.') : t('HTML markup is restricted/corrected with the @htmLawed filter for compliance with admin. policy and standards and for security. More details about the restrictions in effect may be available elsewhere, such as in the text of the filter-tips of text formats that use htmLawed and on the forms for configuring text formats.', array('@htmLawed' => \Drupal::l('htmLawed', Url::fromUri('http://www.bioinformatics.org/phplabware/internal_utilities/htmLawed')))) . (!\Drupal::currentUser()->hasPermission('administer filters') ? '' : t(' For information on configuring the htmLawed filter, visit the htmLawed module @help section.', array('@help' => \Drupal::l(t('help'), Url::fromUri('base:admin/help/htmlawed'))))));
     return $help;
   }
 }
