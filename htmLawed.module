@@ -37,9 +37,9 @@ function htmLawed_libraries_info() {
     'version arguments' => array(
     // The htmLawed version is supposed to be hard-coded within function hl_version() in htmLawed.php
       'file' => 'htmLawed.php',
-      'pattern' => "`return '([^']+)'`",
-      'lines' => 1500,
-      'cols' => 30,
+      'pattern' => "`return\s+'([^';]+)'\s*;`",
+      'lines' => 3500,
+      'cols' => 35,
     ),
     'files' => array(
       'php' => array(
