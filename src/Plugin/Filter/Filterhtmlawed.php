@@ -55,7 +55,7 @@ class Filterhtmlawed extends FilterBase {
     // If PHP code blocks are to be preserved, hide the special characters
     // like '<' of '<?php'.The 'save_php' parameter is NOT an htmLawed parameter per se.
     if (!empty($config['save_php'])) {
-      $text = preg_replace(array('`<\?php(.+?)\?>`sme', '`<\?php(.*)$`sme'), array("\"\x83?php\". str_replace(array('<', '>', '&'), array('&lt;', '&gt;', '&amp;'), '$1'). \"?\x84\"", "\"\x83?php\". str_replace(array('<', '>', '&'), array('&lt;', '&gt;', '&amp;'), '$1')"), $text);
+      $text = preg_replace_callback('`<\?php(.+?)\?>|<\?php(.*?)$`sm', function($m){return "\x83?php". str_replace(array('<', '>', '&'), array('&lt;', '&gt;', '&amp;'), $m[1]). (substr($m[0], -2) == '?>' ? "?\84" : '');}, $text);
     }
     
     // If Libraries module (API 3.x) is enabled, use htmLawed library through it;
@@ -78,7 +78,7 @@ class Filterhtmlawed extends FilterBase {
     
     // Handle any PHP code preservation.
     if (!empty($config['save_php'])) {
-      $text = preg_replace(array('`\x83\?php(.+?)\?\x84`sme', '`\x83\?php(.*)$`sme'), array("'<?php'. str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), '$1'). '?>'", "'<?php'. str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), '$1')"), $text);
+      $text = preg_replace_callback('`\x83\?php(.+?)\?\x84|\x83\?php(.*?)$`sm', function($m){return "<?php". str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), $m[1]). (substr($m[0], -2) == "?\x84" ? "?>" : '');}, $text);
     }
     
     // Return value.
