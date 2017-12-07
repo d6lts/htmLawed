@@ -78,7 +78,7 @@ function _htmLawed_process($text, $filter, $format, $langcode, $cache, $cache_id
   // If PHP code blocks are to be preserved, hide the special characters like '<' of '<?php'
   // 'save_php' is NOT an htmLawed parameter per se, but is a parameter for the Drupal htmLawed module
   if (!empty($config['save_php'])) {
-    $text = preg_replace(array('`<\?php(.+?)\?>`sme', '`<\?php(.*)$`sme'), array("\"\x83?php\". str_replace(array('<', '>', '&'), array('&lt;', '&gt;', '&amp;'), '$1'). \"?\x84\"", "\"\x83?php\". str_replace(array('<', '>', '&'), array('&lt;', '&gt;', '&amp;'), '$1')"), $text);
+    $text = preg_replace_callback('`<\?php(.+?)\?>|<\?php(.*?)$`sm', function($m){return "\x83?php". str_replace(array('<', '>', '&'), array('&lt;', '&gt;', '&amp;'), $m[1]). (substr($m[0], -2) == '?>' ? "?\84" : '');}, $text);
   }
   
   $text = htmLawed($text, $config, $settings['htmLawed']['spec']);
@@ -86,7 +86,7 @@ function _htmLawed_process($text, $filter, $format, $langcode, $cache, $cache_id
   // If PHP code blocks were preserved, unhide the special characters like '<' of '<?php'
   // 'save_php' is NOT an htmLawed parameter per se, but is a parameter for the Drupal htmLawed module
   if (!empty($config['save_php'])) {
-    $text = preg_replace(array('`\x83\?php(.+?)\?\x84`sme', '`\x83\?php(.*)$`sme'), array("'<?php'. str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), '$1'). '?>'", "'<?php'. str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), '$1')"), $text);
+    $text = preg_replace_callback('`\x83\?php(.+?)\?\x84|\x83\?php(.*?)$`sm', function($m){return "<?php". str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), $m[1]). (substr($m[0], -2) == "?\x84" ? "?>" : '');}, $text);
   }
   
   // In case Drupal's teaser-break is in use
