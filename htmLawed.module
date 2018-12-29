@@ -552,7 +552,7 @@ function theme_htmLawed_tabled_subform($subform = NULL) {
  * Using htmLawed's hook function to preserve PHP code before 'save'
  */
 function _htmLawed_save_php($text) {
-  return preg_replace(array('`<\?php(.+?)\?>`sme', '`<\?php(.*)$`sme'), array("\"\x83?php\". str_replace(array('<', '>', '&'), array('&lt;', '&gt;', '&amp;'), '$1'). \"?\x84\"", "\"\x83?php\". str_replace(array('<', '>', '&'), array('&lt;', '&gt;', '&amp;'), '$1')"), $text);
+  return preg_replace_callback('`<\?php(.+?)\?>|<\?php(.*?)$`sm', function($m){return "\x83?php". str_replace(array('<', '>', '&'), array('&lt;', '&gt;', '&amp;'), $m[1]). (substr($m[0], -2) == '?>' ? "?\84" : '');}, $text);
 }
 
 /*
@@ -566,7 +566,7 @@ function _htmLawed_process($text = '', $config = NULL, $spec = NULL, $hook_param
   }
   $text = htmLawed($text, $config, $spec);
   if($hook_parameter == 'save_php'){
-    $text = preg_replace(array('`\x83\?php(.+?)\?\x84`sme', '`\x83\?php(.*)$`sme'), array("'<?php'. str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), '$1'). '?>'", "'<?php'. str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), '$1')"), $text);
+    $text = preg_replace_callback('`\x83\?php(.+?)\?\x84|\x83\?php(.*?)$`sm', function($m){return "<?php". str_replace(array('&amp;', '&lt;', '&gt;'), array('&', '<', '>'), $m[1]). (substr($m[0], -2) == "?\x84" ? "?>" : '');}, $text);
   }
   // In case Drupal's teaser-break is in use
   $text = str_replace('<!--break -->', '<!--break-->', $text);
